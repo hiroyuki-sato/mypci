@@ -4,6 +4,15 @@ use std::io::BufReader;
 use std::io::prelude::*;
 use regex::Regex;
 
+enum Token {
+    Pci,
+    PciSub,
+    PciSubDev,
+    PciClass,
+    PciSubClass,
+    PciProg,
+}
+
 struct Pci {
     code: u16,
     name: String,
