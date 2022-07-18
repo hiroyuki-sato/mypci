@@ -37,14 +37,14 @@ fn main() {
 
     let f = File::open("/usr/share/misc/pci.ids").unwrap();
     let reader = BufReader::new(f);
-    let re_comment = Regex::new("^\\s*(#|$)").unwrap();
-    let re_pci_dev = Regex::new("^([0-9a-f]{4})\\s+(.*)").unwrap();
-    let re_pci_sub = Regex::new("^\\t[0-9a-f]{4}\\s+(.*)").unwrap();
-    let re_pci_sdv = Regex::new("^\\t\\t[0-9a-f]{4}\\s+[0-9a-f]{4}\\s+(.*)").unwrap();
+    let re_comment = Regex::new(r"^\s*(#|$)").unwrap();
+    let re_pci_dev = Regex::new(r"^([0-9a-f]{4})\s+(.*)").unwrap();
+    let re_pci_sub = Regex::new(r"^\t[0-9a-f]{4}\s+(.*)").unwrap();
+    let re_pci_sdv = Regex::new(r"^\t\t[0-9a-f]{4}\s+[0-9a-f]{4}\s+(.*)").unwrap();
 
-    let re_dev_cls = Regex::new("^C\\s+[0-9a-f]{2}\\s+(.*)").unwrap();
-    let re_dev_sub = Regex::new("\\t[0-9a-f]{2}\\s+(.*)").unwrap();
-    let re_dev_prg = Regex::new("\\t\\t[0-9a-f]{2}\\s+(.*)").unwrap();
+    let re_dev_cls = Regex::new(r"^C\s+[0-9a-f]{2}\s+(.*)").unwrap();
+    let re_dev_sub = Regex::new(r"\t[0-9a-f]{2}\s+(.*)").unwrap();
+    let re_dev_prg = Regex::new(r"\t\t[0-9a-f]{2}\s+(.*)").unwrap();
 
     println!("{}",hex_to_num(&"FF".to_string()));
 
