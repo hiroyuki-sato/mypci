@@ -13,9 +13,10 @@ enum Token {
     PciProg,
 }
 
-struct Pci {
+#[derive(Debug)]
+struct Pci<'a> {
     code: u16,
-    name: String,
+    name: &'a str,
 }
 
 struct PciSub {
@@ -36,7 +37,7 @@ struct PciSubDev {
 }
 
 
-fn hex_to_num(str: &String) -> u16 {
+fn hex_to_num(str: &str) -> u16 {
 
     let v = u16::from_str_radix(str,16);
     return v.unwrap();
@@ -63,6 +64,13 @@ fn main() {
             Some(_) =>  continue,
             None => (),
         };
+        match pci_dev(&l) {
+            Some((a,b)) => {
+                println!("{:?}", b)
+            },
+            _ => (),
+        }
+/*        
         match re_pci_dev.find(&l) {
             Some(_) => {
                 let cap = re_pci_dev.captures(&l).unwrap();
@@ -71,6 +79,7 @@ fn main() {
 //            Some(_) => continue,
             _ => (),
         }
+*/        
         match re_pci_sdv.find(&l) {
 //            Some(_) => println!("{}",l),
             Some(_) => continue,
@@ -100,4 +109,22 @@ fn main() {
 
 //        println!("{}",l);
     } 
+}
+
+fn pci_dev(str: &String) -> Option<(Token,Pci)> {    
+    let re_pci_dev = Regex::new(r"^([0-9a-f]{4})\s+(.*)").unwrap();
+
+    match re_pci_dev.find(str) {
+        Some(_) => {
+            let cap = re_pci_dev.captures(str).unwrap();
+            // println!("code: {}, name: {:?}",cap.get(1).map_or("",|m| m.as_str() ), cap.get(2).map_or("",|m| m.as_str() ));
+            //let pci = Pci::new( name: cap.get(2).map_or("", |m| m.to_string() ), code: hex_to_num(cap.get(1).map_or("", |m| m.as_str)));
+            let pci = Pci{ 
+                code: hex_to_num(cap.get(1).map_or("", |m| m.as_str())),
+                name: cap.get(2).map_or("", |m| m.as_str() ),
+            };
+            Some((Token::Pci, pci))
+        },
+        _ => None
+    }
 }
