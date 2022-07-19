@@ -45,7 +45,8 @@ fn hex_to_num(str: &str) -> u16 {
 
 fn main() {
 
-    let f = File::open("/usr/share/misc/pci.ids").unwrap();
+//    let f = File::open("/usr/share/misc/pci.ids").unwrap();
+    let f = File::open("./pci.ids").unwrap();
     let reader = BufReader::new(f);
     let re_comment = Regex::new(r"^\s*(#|$)").unwrap();
     let re_pci_dev = Regex::new(r"^([0-9a-f]{4})\s+(.*)").unwrap();
