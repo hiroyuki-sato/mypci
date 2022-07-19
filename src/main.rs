@@ -19,6 +19,7 @@ struct Pci<'a> {
     name: &'a str,
 }
 
+#[derive(Debug)]
 struct PciSub {
     code: u16,
     name: String,
@@ -115,11 +116,9 @@ fn main() {
 fn pci_dev(str: &String) -> Option<(Token,Pci)> {    
     let re_pci_dev = Regex::new(r"^([0-9a-f]{4})\s+(.*)").unwrap();
 
-    match re_pci_dev.find(str) {
-        Some(_) => {
-            let cap = re_pci_dev.captures(str).unwrap();
-            // println!("code: {}, name: {:?}",cap.get(1).map_or("",|m| m.as_str() ), cap.get(2).map_or("",|m| m.as_str() ));
-            //let pci = Pci::new( name: cap.get(2).map_or("", |m| m.to_string() ), code: hex_to_num(cap.get(1).map_or("", |m| m.as_str)));
+    match re_pci_dev.captures(str) {
+
+        Some(cap) => {
             let pci = Pci{ 
                 code: hex_to_num(cap.get(1).map_or("", |m| m.as_str())),
                 name: cap.get(2).map_or("", |m| m.as_str() ),
