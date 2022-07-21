@@ -20,11 +20,10 @@ struct Pci<'a> {
 }
 
 #[derive(Debug)]
-struct PciSub {
-    code: u16,
-    name: String,
-    dev_code: u8,
-    dev_name: String,    
+struct PciSub<'a> {
+    vendor: &'a Pci<'a>,
+    dev_code: u16,
+    dev_name: &'a str,
 }
 
 struct PciSubDev {
@@ -50,8 +49,8 @@ fn main() {
     let f = File::open("./pci.ids").unwrap();
     let reader = BufReader::new(f);
     let re_comment = Regex::new(r"^\s*(#|$)").unwrap();
-    let re_pci_dev = Regex::new(r"^([0-9a-f]{4})\s+(.*)").unwrap();
-    let re_pci_sub = Regex::new(r"^\t[0-9a-f]{4}\s+(.*)").unwrap();
+    //let re_pci_dev = Regex::new(r"^([0-9a-f]{4})\s+(.*)").unwrap();
+    //let re_pci_sub = Regex::new(r"^\t[0-9a-f]{4}\s+(.*)").unwrap();
     let re_pci_sdv = Regex::new(r"^\t\t[0-9a-f]{4}\s+[0-9a-f]{4}\s+(.*)").unwrap();
 
     let re_dev_cls = Regex::new(r"^C\s+[0-9a-f]{2}\s+(.*)").unwrap();
@@ -59,6 +58,7 @@ fn main() {
     let re_dev_prg = Regex::new(r"\t\t[0-9a-f]{2}\s+(.*)").unwrap();
 
     println!("{}",hex_to_num(&"FF".to_string()));
+    let mut cur_pci: Option<Pci> = None;
 
     for line in reader.lines() {
         let l = line.unwrap();
@@ -66,30 +66,18 @@ fn main() {
             Some(_) =>  continue,
             None => (),
         };
+
         match pci_dev(&l) {
-            Some((a,b)) => {
-                println!("{:?}", b)
-            },
+            Some((_token,pci)) => cur_pci = Some(pci),
             _ => (),
-        }
-/*        
-        match re_pci_dev.find(&l) {
-            Some(_) => {
-                let cap = re_pci_dev.captures(&l).unwrap();
-                println!("code: {}, name: {:?}",cap.get(1).map_or("",|m| m.as_str() ), cap.get(2).map_or("",|m| m.as_str() ));
-            },
-//            Some(_) => continue,
-            _ => (),
-        }
-*/        
+        }        
         match re_pci_sdv.find(&l) {
-//            Some(_) => println!("{}",l),
             Some(_) => continue,
             _ => (),
         }
-        match re_pci_sub.find(&l) {
-            //Some(_) => println!("{}",l),
-            Some(_) => continue,
+
+        match pci_sub(&cur_pci.unwrap(),&l) {
+            Some((_token,pci_sub)) => println!("{:?}",pci_sub),
             _ => (),
         }
 
@@ -113,7 +101,7 @@ fn main() {
     } 
 }
 
-fn pci_dev(str: &String) -> Option<(Token,Pci)> {    
+fn pci_dev<'a>(str: &'a str) -> Option<(Token,Pci<'a>)> {    
     let re_pci_dev = Regex::new(r"^([0-9a-f]{4})\s+(.*)").unwrap();
 
     match re_pci_dev.captures(str) {
@@ -124,6 +112,24 @@ fn pci_dev(str: &String) -> Option<(Token,Pci)> {
                 name: cap.get(2).map_or("", |m| m.as_str() ),
             };
             Some((Token::Pci, pci))
+        },
+        _ => None
+    }
+}
+
+fn pci_sub<'a>(pci: &'a Pci, str: &'a str) -> Option<(Token,PciSub<'a>)> {
+
+    let re_pci_sub = Regex::new(r"^\t([0-9a-f]{4})\s+(.*)").unwrap();
+
+    match re_pci_sub.captures(str) {
+
+        Some(cap) => {
+            let pci_sub = PciSub {
+                vendor: pci,
+                dev_code: hex_to_num(cap.get(1).map_or("", |m| m.as_str())),
+                dev_name: cap.get(2).map_or("", |m| m.as_str() ),
+            };
+            Some((Token::PciSub, pci_sub))
         },
         _ => None
     }
