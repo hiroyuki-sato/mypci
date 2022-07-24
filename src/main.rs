@@ -58,29 +58,30 @@ fn main() {
     let re_dev_prg = Regex::new(r"\t\t[0-9a-f]{2}\s+(.*)").unwrap();
 
     println!("{}",hex_to_num(&"FF".to_string()));
-    let mut cur_pci: Option<Pci> = None;
+    let mut cur_pci = Pci { name: "none", code: 0xFFFF };
 
+    let mut l;
     for line in reader.lines() {
-        let l = line.unwrap();
-        match re_comment.find(&l) {
-            Some(_) =>  continue,
-            None => (),
+        //let l = line.unwrap();
+        l = line.unwrap();
+        if let Some(_) = re_comment.find(&l) {
+            continue;
         };
 
-        match pci_dev(&l) {
-            Some((_token,pci)) => cur_pci = Some(pci),
-            _ => (),
-        }        
+        if let Some((_token,pci)) = pci_dev(&l) {
+            cur_pci = pci;
+            continue;
+        }
+/*
         match re_pci_sdv.find(&l) {
             Some(_) => continue,
             _ => (),
         }
-
-        match pci_sub(&cur_pci.unwrap(),&l) {
-            Some((_token,pci_sub)) => println!("{:?}",pci_sub),
-            _ => (),
+*/
+        if let Some((_token,pci_sub)) = pci_sub(&cur_pci,&l) {
+            println!("{:?}",pci_sub);
         }
-
+/*
         match re_dev_cls.find(&l) {
             //Some(_) => println!("{}",l),
             Some(_) => continue,
@@ -94,8 +95,9 @@ fn main() {
         match re_dev_prg.find(&l) {
             //Some(_) => println!("{}",l),
             Some(_) => continue,
-            _ => (),
+            _ => (),            
         }
+*/        
 
 //        println!("{}",l);
     } 
